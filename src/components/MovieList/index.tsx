@@ -1,17 +1,22 @@
 'use client';
 import { useEffect, useState } from 'react';
+import ReactLoading from 'react-loading'
 import './index.scss';
 import axios from 'axios';
+import { Movie } from '@/app/Types/movie';
+import MovieCard from '../MovieCard';
+
 
 export default function MovieList() {
-    const [movies, setMovies] = useState([]);
+    const [movies, setMovies] = useState<Movie[]>([]);
+    const [isLoading, setLoading] = useState<boolean>(true)
 
     useEffect(() => {
          getMovies();
     }, []);
 
-    const getMovies = () => {
-        axios({
+    const getMovies = async () => {
+       await axios({
             method: 'get',
             url: 'https://api.themoviedb.org/3/discover/movie',
             params: {
@@ -21,16 +26,25 @@ export default function MovieList() {
         }).then(response => {
             setMovies(response.data.results)
         })
-    }
 
-   
+        setLoading(false);
+    }  
+
+    if (isLoading) {
+        return (
+            <div className='loading-container'>
+                <ReactLoading type="spin" color="#6046ff" height={'6%'} width={'5%'} />
+            </div>
+        )
+    }
         
     return (    
         <ul className="movie-list">
             {movies.map((movie) =>
-              <li className='movie-card'>
-                {movie.title}
-              </li>
+               <MovieCard 
+                  key={movie.id}
+                  movie={movie}
+               />
             )}          
         </ul>
     );
